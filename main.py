@@ -92,4 +92,20 @@ async def help(ctx):
     help_embed.set_footer(text=f"Requested by {ctx.author.display_name}")
     await ctx.send(embed=help_embed)
 
+@bot.command()
+async def weather(ctx, city="Addis Ababa"):
+    """
+    Get the current weather for a specified location.
+    Usage: `!weather [city]`
+    Use "" for city names that have space in them. E.g. `!weather "New Delhi"`
+    """
+    response = requests.get(f'{api_url}/current.json?key={weatherapi}&q={city}')
+    data = response.json()
+
+    if response.status_code == 200:
+        weather_info = f"Current temperature: {data['current']['temp_c']}°C, Condition: {data['current']['condition']['text']}"
+        await ctx.send(f'Current weather in {city}: {weather_info}')
+    else:
+        await ctx.send(f"Failed to fetch weather data for {city}. Check your location or try again later.")
+
 bot.run(bot_token)
