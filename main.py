@@ -12,8 +12,8 @@ weatherapi = os.environ.get('WEATHERAPI_KEY')
 bot_token = os.environ.get('BOT_TOKEN')
 
 intents = discord.Intents.default()
-intents.typing = False
-intents.presences = False
+intents.typing = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -52,6 +52,9 @@ async def send_weather_message():
 
 @bot.command()
 async def start(ctx):
+    """
+    Start hourly weather updates.
+    """
     if not send_weather_message.is_running():
         send_weather_message.start()
         await ctx.send('Hourly weather updates started.')
@@ -60,10 +63,33 @@ async def start(ctx):
 
 @bot.command()
 async def stop(ctx):
+    """
+    Stop hourly weather updates.
+    """
     if send_weather_message.is_running():
         send_weather_message.stop()
         await ctx.send('Hourly weather updates stopped.')
     else:
         await ctx.send('Hourly weather updates are not running.')
+
+bot.remove_command('help')
+
+@bot.command()
+async def help(ctx):
+    """
+    Get this help message
+    """
+    help_embed = discord.Embed(
+        title="Bot Commands",
+        description="Here are the available commands:",
+        color=discord.Color.blue()
+    )
+
+    for command in bot.commands:
+        if not command.hidden:
+            help_embed.add_field(name=f"!{command.name}", value=command.help, inline=False)
+
+    help_embed.set_footer(text=f"Requested by {ctx.author.display_name}")
+    await ctx.send(embed=help_embed)
 
 bot.run(bot_token)
